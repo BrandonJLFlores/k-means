@@ -1,3 +1,13 @@
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+
+import javax.swing.*;
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -5,16 +15,43 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class Main {
+public class Main extends JFrame{
     private static String FILENAME;
     private static ArrayList<points> centroids;
     private static ArrayList<points> newCentroids;
     private static ArrayList<points> data;
     private static int iterations;
     private static Double prevJ;
+    private static XYSeries series1;
+    private static XYSeries series2;
+    private static XYSeries series3;
+    private static XYSeriesCollection dataset;
 
+
+    private Main(){
+        super("Scatter Plot");
+
+        XYDataset DATA = dataset;
+        JFreeChart chart = ChartFactory.createScatterPlot(
+                "Scatter Plot",
+                "X-Axis", "Y-Axis", DATA);
+
+
+        //Changes background color
+        XYPlot plot = (XYPlot)chart.getPlot();
+        plot.setBackgroundPaint(Color.BLACK);
+
+
+        // Create Panel
+        ChartPanel panel = new ChartPanel(chart);
+        setContentPane(panel);
+    }
     // initializing centroids and filename
     static{
+        dataset = new XYSeriesCollection();
+        series1 = new XYSeries("Centroid 1");
+        series2 = new XYSeries("Centroid 2");
+        series3 = new XYSeries("Centroid 3");
         FILENAME= "resources/kmdata1.txt";
         centroids= newCentroids = new ArrayList<points>();            // arrraylist for dynamic centroids
         data = new ArrayList<points>();
@@ -31,6 +68,10 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         Main m = new Main();//ggcg
+        m.setSize(640, 480);
+        m.setLocationRelativeTo(null);
+        m.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        m.setVisible(true);
         m.loadFiles(FILENAME);
         System.out.println("iterations " + iterations);
         for(int i = 0 ; i < iterations;i++) {
@@ -45,6 +86,9 @@ public class Main {
             System.out.println("5~");
             centroids = newCentroids;
         }
+        dataset.addSeries(series1);
+        dataset.addSeries(series2);
+        dataset.addSeries(series3);
     }
     private void fileWrite(ArrayList<Integer> minIndex, ArrayList<ArrayList<Double>> clusterAssignment, Double J, int filenumber) throws IOException {
 
@@ -70,8 +114,18 @@ public class Main {
             writer1.write(String.valueOf(i + 1) + "\n");
         }
 
+        int i = 0;
+
         for(points p : newCentroids){
             writer2.write(p.getX() + " " + p.getY() + "\n");
+            if(i == 0){
+                series1.add(p.getX(),p.getY());
+            }else if(i == 1){
+                series2.add(p.getX(),p.getY());
+            }else {
+                series3.add(p.getX(),p.getY());
+            }
+            i++;
         }
 
         writer2.write("J = " + J + "\n");
