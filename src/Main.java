@@ -1,6 +1,9 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class Main {
     private static String FILENAME;
@@ -8,22 +11,28 @@ public class Main {
     private static ArrayList<points> newCentroids;
     private static ArrayList<points> data;
     private static int iterations;
+    private static Double prevJ;
 
     // initializing centroids and filename
     static{
-        FILENAME= "resources/test.txt";
+        FILENAME= "resources/kmdata1.txt";
         centroids= newCentroids = new ArrayList<points>();            // arrraylist for dynamic centroids
         data = new ArrayList<points>();
-        centroids.add(new points(3,2));         // setting starting centroids
-        centroids.add(new points(6,4));
-        //centroids.add(new points(8,5));
-        iterations =1;
+//        centroids.add(new points(3,2));         // setting starting centroids
+//        centroids.add(new points(6,4));
+
+        centroids.add(new points(3,3));
+        centroids.add(new points(6,2));
+        centroids.add(new points(8,5));
+
+        iterations =10;
+        prevJ = 0d;
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws IOException {
         Main m = new Main();//ggcg
         m.loadFiles(FILENAME);
-        System.out.println(iterations);
+        System.out.println("iterations " + iterations);
         for(int i = 0 ; i < iterations;i++) {
             System.out.println("1~");
             ArrayList<ArrayList<Double>> clusterAssign = m.clusterAssignment();   //assigns cluster
@@ -32,26 +41,46 @@ public class Main {
             System.out.println("3~");
             Double J = m.computeJ(minIndex, clusterAssign);                       //computes Cost
             System.out.println("4~");
-            m.fileWrite(clusterAssign,i);
+            m.fileWrite(minIndex, clusterAssign, J,i + 1);
             System.out.println("5~");
             centroids = newCentroids;
         }
     }
-    private void fileWrite(ArrayList<ArrayList<Double>> clusterAssignment, int filenumber){
-        System.out.println(clusterAssignment.size());
-        System.out.println(clusterAssignment.get(0).size());
-        System.out.println(centroids.size());
-        /*        try {
-            PrintWriter writer = new PrintWriter("iter"+filenumber+"_ca.txt", "UTF-8");
-            for(int i = 0 ; i < clusterAssignment.size(); i++) {
-                for (int j = 0 ; j < centroids.; j++) {
-                    writer.println(clusterAssignment().get(i).get(j));
-                }
-            }
-            writer.close();
-        }catch (Exception e){
-            e.printStackTrace();
-        }*/
+    private void fileWrite(ArrayList<Integer> minIndex, ArrayList<ArrayList<Double>> clusterAssignment, Double J, int filenumber) throws IOException {
+
+        String ca = "_ca.txt";
+        String cm = "_cm.txt";
+        /**
+         * use ning naa sa ubos para di siya mo write sulod sa ca and cm na folder
+         */
+//        String iter = "iter";
+//        FileWriter writer1 = new FileWriter(iter + filenumber + ca);
+//        FileWriter writer2 = new FileWriter(iter + filenumber + cm);
+
+        //---------------------START------------------//
+
+        String iter1 = "resources/Answers/ca/iter";
+        String iter2 = "resources/Answers/cm/iter";
+
+
+        FileWriter writer1 = new FileWriter(iter1 + filenumber + ca);
+        FileWriter writer2 = new FileWriter(iter2 + filenumber + cm);
+
+        for(Integer i : minIndex){
+            writer1.write(String.valueOf(i + 1) + "\n");
+        }
+
+        for(points p : newCentroids){
+            writer2.write(p.getX() + " " + p.getY() + "\n");
+        }
+
+        writer2.write("J = " + J + "\n");
+        Double dJ = J - prevJ;
+        writer2.write("dJ = " + dJ + "\n");
+        prevJ = J;
+
+        writer1.close();
+        writer2.close();
     }
 
     private Double computeJ(ArrayList<Integer> minIndex, ArrayList<ArrayList<Double>> clusterAssignment){
@@ -60,7 +89,7 @@ public class Main {
             j += clusterAssignment.get(minIndex.get(i)).get(i);
         }
         j /= minIndex.size();
-        System.out.println(j);
+        System.out.println("J: " + j);
         return j;
     }
 
@@ -85,10 +114,25 @@ public class Main {
             newCentroids.get(min).setX(newCentroids.get(min).getX() + data.get(j).getX());
             newCentroids.get(min).setY(newCentroids.get(min).getY() + data.get(j).getY());
         }
-        for(int i = 0 ;i <centroids.size();i++ ){
-            newCentroids.get(i).setX(newCentroids.get(i).getX()*(centroids.size() / clusterAssignment.size()));
-            newCentroids.get(i).setY(newCentroids.get(i).getY()*(centroids.size() / clusterAssignment.size()));
+
+        //---------------new centroid location----------------//
+        //just divided every point to 4
+        int zeroOccurrences = Collections.frequency(minIndex, 0);
+        int oneOccurrences = Collections.frequency(minIndex, 1);
+        int twoOccurences = Collections.frequency(minIndex, 2);
+        int[] occurences = {zeroOccurrences,oneOccurrences,twoOccurences};
+        int i = 0;
+        for(points p : newCentroids){
+            p.setX(p.getX()/occurences[i]);
+            p.setY(p.getY()/occurences[i]);
+            i++;
         }
+
+        //--------------------MIKE ORIGINAL VERSION-----------------//
+//        for(int i = 0 ;i <centroids.size();i++ ){
+//            newCentroids.get(i).setX(newCentroids.get(i).getX()*(centroids.size() / clusterAssignment.size()));
+//            newCentroids.get(i).setY(newCentroids.get(i).getY()*(centroids.size() / clusterAssignment.size()));
+//        }
         return minIndex;
     }
 
@@ -128,4 +172,5 @@ public class Main {
         }
 
     }
+
 }
