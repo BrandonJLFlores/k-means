@@ -15,9 +15,9 @@ public class Main{
 
     // initializing centroids and filename
     static{
-        FILENAME= "resources/kmdata1.txt";
-        centroids= newCentroids = new ArrayList<points>();            // arrraylist for dynamic centroids
-        data = new ArrayList<points>();
+        FILENAME= "resources/kmdata1.txt"; //todo <----- change file name if you want to try other test files
+        centroids= newCentroids = new ArrayList<>();            // arrraylist for dynamic centroids
+        data = new ArrayList<>();
 
         centroids.add(new points(3,3));
         centroids.add(new points(6,2));
@@ -43,10 +43,6 @@ public class Main{
 
         String ca = "_ca.txt";
         String cm = "_cm.txt";
-        /**
-         * use ning naa sa ubos para di siya mo write sulod sa ca and cm na folder
-         */
-
         //---------------------START------------------//
 
         String iter1 = "resources/Answers/ca/iter";
@@ -106,7 +102,6 @@ public class Main{
         }
 
         //---------------new centroid location----------------//
-        //just divided every point to ???
         ArrayList<Integer> occurences = new ArrayList<>();
         for(int i = 0; i < centroids.size(); i++){
             int occ = Collections.frequency(minIndex, i);
@@ -130,12 +125,12 @@ public class Main{
         ArrayList<ArrayList<Double>> clusterAssignment = new ArrayList<ArrayList<Double>>();
 
         //iterate for each cluster calculations
-        for(int j = 0 ; j < centroids.size(); j++){
-            ArrayList <Double> temp = new ArrayList<Double>();
+        for (points centroid : centroids) {
+            ArrayList<Double> temp = new ArrayList<Double>();
             // iterate from top to down
-            for(int i = 0; i < data.size();i++){
-                temp.add(Math.sqrt((Math.pow(data.get(i).getX() - centroids.get(j).getX(),2)) +
-                        (Math.pow(data.get(i).getY() - centroids.get(j).getY(),2))));
+            for (points aData : data) {
+                temp.add(Math.sqrt((Math.pow(aData.getX() - centroid.getX(), 2)) +
+                        (Math.pow(aData.getY() - centroid.getY(), 2))));
             }
             clusterAssignment.add(temp);
         }
